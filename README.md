@@ -2,50 +2,51 @@
 
 Project: Creating an e-commerce site
 
-Team Leader:
-David Lunsford  (dalsford3974)
-NetID:dal401 
-email:dalsford397@gmail.com
+Team Leader:<br />
+David Lunsford  (dalsford3974)<br />
+NetID:dal401 <br />
+email:dalsford397@gmail.com<br />
 
-Team Members:
-Zayne Quinn (FacelessRush)
-NetID:zaq8
-email:zaynequinn@gmail.com
 
-Austin Wilson (haw774)
-NetID:ajw774
-email:ajw774@msstate.edu
+Team Members:<br />
+Zayne Quinn (FacelessRush)<br />
+NetID:zaq8<br />
+email:zaynequinn@gmail.com<br />
 
-Angel Ezenwoko (Angel251603)
-NetID:aae214
-email:aae214@msstate.edu
+Austin Wilson (haw774)<br />
+NetID:ajw774<br />
+email:ajw774@msstate.edu<br />
 
-Programming Language - Python
+Angel Ezenwoko (Angel251603)<br />
+NetID:aae214<br />
+email:aae214@msstate.edu<br />
 
-Description:
-We are creating an e-commerce sites that will allow a party (business, independent seller, etc.) to list and sell products to other parties (business, independent buyers, etc.)
+Programming Language - Python<br />
 
-Objectives/Features:
-The Objectives/Features are broken down by user category and include
+Description:<br />
+We are creating an e-commerce sites that will allow a party (business, independent seller, etc.) to list and sell products to other parties (business, independent buyers, etc.)<br />
 
-Buyer 
--Create, edit, and delete their account  
--Login/out of their account  
--Browse all listed products 
--Add/remove items from cart 
--Purchase and return products 
--View previous orders 
+Objectives/Features:<br />
+The Objectives/Features are broken down by user category and include<br />
 
-Seller 
--Create, edit, and delete their account 
--Login/out of their account 
--Add/remove their own products from the store 
--Edit their products 
--Ship items to Buyer 
--Change prices 
+Buyer<br />
+-Create, edit, and delete their account<br />
+-Login/out of their account<br />
+-Browse all listed products<br />
+-Add/remove items from cart<br />
+-Purchase and return products<br />
+-View previous orders<br />
 
-Admin 
--Login/out of their account 
--Monitor Seller and Buyer accounts 
--Alter/delete product listings 
--Alter/delete Seller and Buyer accounts 
+Seller<br />
+-Create, edit, and delete their account<br />
+-Login/out of their account<br />
+-Add/remove their own products from the store<br />
+-Edit their products<br />
+-Ship items to Buyer<br />
+-Change prices<br />
+
+Admin<br />
+-Login/out of their account<br />
+-Monitor Seller and Buyer accounts<br />
+-Alter/delete product listings<br />
+-Alter/delete Seller and Buyer accounts<br />
