@@ -6,24 +6,26 @@ Team Leader:<br />
 David Lunsford  (dalsford3974)<br />
 NetID:dal401 <br />
 email:dalsford397@gmail.com<br />
+Back end developer<br />
 
 
 Team Members:<br />
 Zayne Quinn (FacelessRush)<br />
 NetID:zaq8<br />
 email:zaynequinn@gmail.com<br />
+Front end developer<br />
 
 Austin Wilson (haw774)<br />
 NetID:ajw774<br />
 email:ajw774@msstate.edu<br />
+Back end developer<br />
 
 Angel Ezenwoko (Angel251603)<br />
 NetID:aae214<br />
 email:aae214@msstate.edu<br />
+Front end developer<br />
 
-Programming Language - Python<br />
-
-Meeting Minutes: https://en.wikipedia.org/wiki/User:Dalsford397/sandbox />
+Programming Language - Python, HTML, CSS<br />
 
 Description:<br />
 We are creating an e-commerce sites that will allow a party (business, independent seller, etc.) to list and sell products to other parties (business, independent buyers, etc.)<br />
