@@ -23,6 +23,8 @@ email:aae214@msstate.edu<br />
 
 Programming Language - Python<br />
 
+Meeting Minutes: https://en.wikipedia.org/wiki/User:Dalsford397/sandbox />
+
 Description:<br />
 We are creating an e-commerce sites that will allow a party (business, independent seller, etc.) to list and sell products to other parties (business, independent buyers, etc.)<br />
 
