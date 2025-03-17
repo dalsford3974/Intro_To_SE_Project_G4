@@ -15,7 +15,7 @@ NetID:zaq8<br />
 email:zaynequinn@gmail.com<br />
 Front end developer<br />
 
-Austin Wilson (haw774)<br />
+Austin Wilson (ajw774)<br />
 NetID:ajw774<br />
 email:ajw774@msstate.edu<br />
 Back end developer<br />
