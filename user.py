@@ -219,7 +219,30 @@ class User:
     ## NOT FOR ADMIN
 
     def deleteAccount(self):
-        return
+
+        print("Are you sure you want to delete your account.\n")
+        answer = input("(Y/N)?")
+
+        if(answer == "Y"):
+            try:
+                connection = sqlite3.connect(self.databaseName)
+
+            except:
+                print("Failed database connection.")
+
+            cursor = connection.cursor()
+
+            query = "DELETE FROM User WHERE UserID=?"
+            data = (self.userID)
+
+            cursor.execute(query, data)
+            connection.commit()
+
+            self.logout()
+
+        else:
+            return
+        
     
     def editAccount(self):
         return
