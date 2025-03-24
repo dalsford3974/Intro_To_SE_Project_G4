@@ -1,4 +1,4 @@
-# Intro_To_SE_Project_G5
+# Intro_To_SE_Project_G4
 
 Project: Creating an e-commerce site
 
