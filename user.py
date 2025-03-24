@@ -1,4 +1,6 @@
-import sqlite3
+from flask import Flask, request, jsonify, session
+from models import db, User
+from flask_sqlalchemy import SQLAlchemy
 import sys
 import random
 
@@ -245,7 +247,28 @@ class User:
         
     
     def editAccount(self):
-        return
+
+        try:
+            connection = sqlite3.connect(self.databaseName)
+
+        except:
+            print("Failed database connection.")
+
+        cursor = connection.cursor()
+
+        email = input("Email: ")
+        first = input("First Name: ")
+        last = input("Last Name: ")
+        address = input("Address: ")
+        city = input("City: ")
+        state = input("State: ")
+        zipcode = input("Zipcode: ")
+
+        query = "INSERT INTO User (Email, FirstName, LastName, Address, City, State, Zip) VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+        data = (email, first, last, address, city, state, zipcode)
+
+        cursor.execute(query, data)
+        connection.commit()
     
     def returnItem(self):
         return
