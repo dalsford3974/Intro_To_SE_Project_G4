@@ -9,8 +9,9 @@ db = SQLAlchemy()
 class User(db.Model):
     __tablename__ = 'users'
     userID = Column(Integer, primary_key=True)
-    firstName = Column(String(50), nullable=False)
-    lastName = Column(String(50), nullable=False)
+    userName = Column(String(50), nullable=False)
+    password = Column(String(50), nullable=False)
+    email = Column(String(50), nullable=False)
     address = Column(String(50), nullable=False)
     city = Column(String(50), nullable=False)
     state = Column(String(50), nullable=False)
