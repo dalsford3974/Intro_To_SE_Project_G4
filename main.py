@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request, redirect, url_for
 from models import db, User
 
 app = Flask(__name__)
@@ -10,6 +10,9 @@ db.init_app(app)
 def home():
     return render_template('home.html')
 
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    return render_template('login.html')
 
 def create_tables():
     with app.app_context():
