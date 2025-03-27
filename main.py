@@ -1,5 +1,6 @@
-from flask import Flask, render_template, request, redirect, url_for
+from flask import Flask, flash, render_template, request, redirect, url_for
 from models import db, User
+import sqlite3
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///introToSE.db'
@@ -12,7 +13,21 @@ def home():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    return render_template('login.html')
+
+    if request.method == 'POST':
+
+        userName = request.form['userName']
+        password = request.form['password']
+
+        existing_user = User.query.filter(userName=userName, password=password).first()
+        if existing_user == None:
+            error = 'Incorrect Username/Password'
+        else:
+            flash("Logged in successfully!")
+            return redirect(url_for('home'))
+    return render_template('login.html', error=error)
+
+        
 
 def create_tables():
     with app.app_context():

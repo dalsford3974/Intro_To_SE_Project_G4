@@ -3,6 +3,7 @@ from models import db, User
 from flask_sqlalchemy import SQLAlchemy
 import sys
 import random
+import sqlite3
 
 class User:
 
@@ -20,17 +21,8 @@ class User:
 
 
         ## setup database and query the database
-        try:
-            connection = sqlite3.connect(self.databaseName)
-
-        except:
-            print("Failed database connection.")
-
-            ## exits the program if unsuccessful
-
-            ## sys.exit()
-
-        ## cursor to send queries through
+        
+        connection = sqlite3.connect(self.databaseName)
         cursor = connection.cursor()
 
         ## sets up query and uses user input for the constraint
