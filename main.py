@@ -20,7 +20,7 @@ def login():
         userName = request.form['userName']
         password = request.form['password']
 
-        existing_user = User.query.filter(userName=userName, password=password).first()
+        existing_user = User.query.filter(User.userName == userName, User.password == password).first()
         if existing_user == None:
             error = 'Incorrect Username/Password'
         else:
