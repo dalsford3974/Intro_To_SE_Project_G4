@@ -1,5 +1,6 @@
 from flask import Flask, flash, render_template, request, redirect, url_for
 from models import db, User
+from models import db, Class
 import sqlite3
 
 app = Flask(__name__)
