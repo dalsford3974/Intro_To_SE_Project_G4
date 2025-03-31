@@ -1,6 +1,5 @@
 from flask import Flask, flash, render_template, request, redirect, url_for, session
 from models import db, User, Class
-import sqlite3
 import random
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -12,7 +11,10 @@ db.init_app(app)
 
 @app.route('/')
 def home():
-    return render_template('home.html')
+    if 'userId' in session:
+        user = User.query.get(session['userId'])
+        return render_template('home.html')
+    return render_template('login.html')
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -29,9 +31,15 @@ def login():
             error = 'Incorrect Username/Password'
         else:
             session['userId'] = existing_user.userId
-            flash("Logged in successfully!")
+            flash("Logged in successfully!", 'success')
             return redirect(url_for('home'))
     return render_template('login.html', error=error)
+
+@app.route('/logout')
+def logout():
+    session.pop('userId', None)
+    flash("Logged out successfully!", "info")
+    return redirect(url_for('login'))
 
 @app.route('/createAccount', methods=['GET', 'POST'])
 def createAccount():
@@ -65,6 +73,7 @@ def createAccount():
                         city=city, state=state, zipCode=zipCode, isAdmin=isAdmin)
             db.session.add(user)
             db.session.commit()
+            flash('Successfully created account.', 'success')
             return redirect(url_for('login'))
         
         elif userNameExists:
@@ -75,7 +84,29 @@ def createAccount():
 
     return render_template('createAccount.html', error=error)
         
+@app.route('/deleteAccount', methods=['GET', 'POST'])
+def deleteAccount():
 
+    error = None
+    
+     
+    if request.method == 'POST':
+        if request.form.get('confirm') == 'Yes':
+            user = User.query.get(session['userId'])
+            if user.isAdmin:
+                flash('Cannot delete admin account.', 'error')
+                return redirect(url_for('home'))
+            db.session.delete(user)
+            db.session.commit()
+            session.pop('userId', None)
+
+            flash('Successfully deleted your account', 'success')
+            return redirect(url_for('home'))
+        else:
+            flash("Cancelling deletion.", 'info')
+            return redirect(url_for('home'))
+        
+    return render_template('confirmAccountDeletion.html', error=error)
 
 def create_tables():
     with app.app_context():
