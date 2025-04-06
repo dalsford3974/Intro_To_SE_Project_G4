@@ -4,6 +4,7 @@ import sqlite3
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///introToSE.db'
+app.secret_key = 'test'
 db.init_app(app)
 
 
@@ -17,11 +18,23 @@ def login():
 
     if request.method == 'POST':
 
-        userName = request.form['userName']
-        password = request.form['password']
+        userNameForm = request.form.get('userName')
+        passwordForm = request.form.get('password')
 
-        existing_user = User.query.filter(userName=userName, password=password).first()
-        if existing_user == None:
+        dataUser = db.session.execute(db.text("SELECT * FROM users WHERE password=:passwordForm AND userName=:userNameForm"),  {"passwordForm": passwordForm, "userNameForm": userNameForm}).fetchone()
+
+        #dataPass = db.session.execute(db.text("SELECT * FROM users WHERE password=:passwordForm"), {"passwordForm": passwordForm}).fetchone()
+        #dataTest = db.session.execute(db.text("SELECT * FROM users WHERE userName=:userNameForm"), {"userNameForm": userNameForm}).fetchone()
+
+        #print(dataPass)
+        #print(dataTest)
+
+        #print(userNameForm)
+        #print(passwordForm)
+
+        #print(dataUser)
+
+        if dataUser == None:
             error = 'Incorrect Username/Password'
         else:
             flash("Logged in successfully!")
