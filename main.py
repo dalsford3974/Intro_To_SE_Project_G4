@@ -18,7 +18,6 @@ def home():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-
     error = None
 
     if request.method == 'POST':
