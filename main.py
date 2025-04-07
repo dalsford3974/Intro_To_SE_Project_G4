@@ -64,7 +64,13 @@ def createAccount():
                 break
 
         username = request.form['username']
-        hashed_password = generate_password_hash(request.form['password'])
+        password = request.form['password']
+        confirmPassword = request.form['confirmPassword']
+        if password != confirmPassword:
+            error = 'Passwords do not match.'
+            flash(error, 'error')
+            return render_template('createAccount.html', error=error)
+        hashed_password = generate_password_hash(password)        
         email = request.form['email']
         address = request.form['address']
         city = request.form['city']
