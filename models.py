@@ -9,8 +9,9 @@ db = SQLAlchemy()
 class User(db.Model):
     __tablename__ = 'users'
     userID = Column(Integer, primary_key=True)
-    firstName = Column(String(50), nullable=False)
-    lastName = Column(String(50), nullable=False)
+    username = Column(String(50), nullable=False)
+    password = Column(String(50), nullable=False)
+    email = Column(String(50), nullable=False)
     address = Column(String(50), nullable=False)
     city = Column(String(50), nullable=False)
     state = Column(String(50), nullable=False)
@@ -20,33 +21,33 @@ class User(db.Model):
 
 class Inventory(db.Model):
     __tablename__ = 'inventory'
-    ItemID = Column(Integer, primary_key=True)
-    Title = Column(String(50), nullable=False)
-    UserID = Column(Integer, ForeignKey('users.userID'), nullable=False)
-    Price = Column(Numeric(10, 2), nullable=False)
-    Stock = Column(Integer, nullable=False)
+    itemID = Column(Integer, primary_key=True)
+    title = Column(String(50), nullable=False)
+    sellerID = Column(Integer, ForeignKey('users.userID'), nullable=False)
+    price = Column(Numeric(10, 2), nullable=False)
+    stock = Column(Integer, nullable=False)
 
 
 class Cart(db.Model):
     __tablename__ = 'cart'
-    CartID = Column(Integer, primary_key=True)
-    UserID = Column(Integer, ForeignKey('users.userID'), nullable=False)
-    ItemID = Column(Integer, ForeignKey('inventory.ItemID'), nullable=False)
-    Quantity = Column(Integer, nullable=False)
+    cartID = Column(Integer, primary_key=True)
+    userID = Column(Integer, ForeignKey('users.userID'), nullable=False)
+    itemID = Column(Integer, ForeignKey('inventory.itemID'), nullable=False)
+    quantity = Column(Integer, nullable=False)
 
 
 class Orders(db.Model):
     __tablename__ = 'orders'
-    OrderID = Column(Integer, primary_key=True)
-    UserID = Column(Integer, ForeignKey('users.userID'), nullable=False)
-    ItemNumber = Column(Integer, nullable=False)
-    Cost = Column(Numeric(10, 2), nullable=False)
-    Date = Column(String, nullable=False)
+    orderID = Column(Integer, primary_key=True)
+    userID = Column(Integer, ForeignKey('users.userID'), nullable=False)
+    itemNumber = Column(Integer, nullable=False)
+    cost = Column(Numeric(10, 2), nullable=False)
+    date = Column(String, nullable=False)
 
 
 class OrderItems(db.Model):
     __tablename__ = 'orderitems'
-    HistoryID = Column(Integer, primary_key=True)
-    OrderID = Column(Integer, ForeignKey('orders.OrderID'), nullable=False)
-    ItemID = Column(Integer, ForeignKey('inventory.ItemID'), nullable=False)
-    Quantity = Column(Integer, nullable=False)
+    historyID = Column(Integer, primary_key=True)
+    orderID = Column(Integer, ForeignKey('orders.orderID'), nullable=False)
+    itemID = Column(Integer, ForeignKey('inventory.itemID'), nullable=False)
+    quantity = Column(Integer, nullable=False)
