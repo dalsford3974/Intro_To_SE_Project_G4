@@ -8,6 +8,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 app = Flask(__name__)
 app.secret_key = "INTRO_TO_SE_PROJECT_G4"
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///introToSE.db'
+app.secret_key = 'test'
 db.init_app(app)
 
 
@@ -27,11 +28,12 @@ def login():
 
     if request.method == 'POST':
 
-        username = request.form['username']
-        password = request.form['password']
+        userNameForm = request.form.get('userName')
+        passwordForm = request.form.get('password')
 
-        existing_user = User.query.filter_by(username=username).first()
-        if not existing_user or not check_password_hash(existing_user.password, password):
+        dataUser = db.session.execute(db.text("SELECT * FROM users WHERE password=:passwordForm AND userName=:userNameForm"),  {"passwordForm": passwordForm, "userNameForm": userNameForm}).fetchone()
+
+        if dataUser == None:
             error = 'Incorrect Username/Password'
         else:
             session['userID'] = existing_user.userID
