@@ -96,12 +96,11 @@ def createAccount():
 
 @app.route('/viewAccount', methods=['GET', 'POST'])
 def viewAccount():
-    error = None
-    user = User.query.get(session['userID'])
-    if request.method == 'POST':
-        if request.form.get('confirm') == 'View':
-            flash('userID')
-            return redirect(url_for('view_account.html', user=User))
+    if 'userID' in session:
+        user = User.query.get(session['userID'])
+        return render_template('viewAccount.html', account=user)
+    else:
+        return redirect(url_for('login'))
 
 
 @app.route('/deleteAccount', methods=['GET', 'POST'])
