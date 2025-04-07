@@ -32,7 +32,7 @@ class Cart(db.Model):
     __tablename__ = 'cart'
     cartID = Column(Integer, primary_key=True)
     userID = Column(Integer, ForeignKey('users.userID'), nullable=False)
-    itemID = Column(Integer, ForeignKey('inventory.ItemID'), nullable=False)
+    itemID = Column(Integer, ForeignKey('inventory.itemID'), nullable=False)
     quantity = Column(Integer, nullable=False)
 
 
@@ -48,6 +48,6 @@ class Orders(db.Model):
 class OrderItems(db.Model):
     __tablename__ = 'orderitems'
     historyID = Column(Integer, primary_key=True)
-    orderID = Column(Integer, ForeignKey('orders.OrderID'), nullable=False)
-    itemID = Column(Integer, ForeignKey('inventory.ItemID'), nullable=False)
+    orderID = Column(Integer, ForeignKey('orders.orderID'), nullable=False)
+    itemID = Column(Integer, ForeignKey('inventory.itemID'), nullable=False)
     quantity = Column(Integer, nullable=False)
