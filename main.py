@@ -178,19 +178,19 @@ def editAccount():
 
 @app.route('/AddToCart', methods=['GET', 'POST'])
 def AddToCart():
-     error = None
+    error = None
     cart = Cart.query.get(session['cartID'])
-     if request.method == 'POST':
-         if request.form.get('confirm') == 'Save Changes':
+    if request.method == 'POST':
+        if request.form.get('confirm') == 'Save Changes':
             if user.isAdmin:
-                flash('Cannot purchase items', 'error')
-                return redirect(url_for('home'))
+               flash('Cannot purchase items', 'error')
+               return redirect(url_for('home'))
             else:
                 cart = request.form['cart']
          
-                  db.session.commit()
-                        flash('added to cart successfully')
-                        return redirect(url_for('cart.html'))
+                db.session.commit()
+                flash('added to cart successfully')
+                return redirect(url_for('cart.html'))
         
         else:
             return redirect(url_for('home'))  
