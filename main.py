@@ -104,7 +104,7 @@ def viewAccount():
      if request.method == 'POST':
          if request.form.get('confirm') == 'View':
              flash ('userID')
-             return redirect(url_for('home'))
+             return redirect(url_for('view_account.html', user = User)
              
 
         
