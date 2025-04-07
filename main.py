@@ -14,8 +14,8 @@ db.init_app(app)
 
 @app.route('/')
 def home():
-    if 'userId' in session:
-        user = User.query.get(session['userId'])
+    if 'userID' in session:
+        user = User.query.get(session['userID'])
         return render_template('home.html')
     return render_template('login.html')
 
@@ -34,7 +34,7 @@ def login():
         if not existing_user or not check_password_hash(existing_user.password, password):
             error = 'Incorrect Username/Password'
         else:
-            session['userId'] = existing_user.userId
+            session['userID'] = existing_user.userID
             flash("Logged in successfully!", 'success')
             return redirect(url_for('home'))
     return render_template('login.html', error=error)
@@ -43,7 +43,7 @@ def login():
 
 @app.route('/logout')
 def logout():
-    session.pop('userId', None)
+    session.pop('userID', None)
     flash("Logged out successfully!", "info")
     return redirect(url_for('login'))
 
@@ -58,8 +58,8 @@ def createAccount():
 
         while True:
 
-            userId = random.randint(100000000, 999999999)
-            exists = User.query.filter_by(userId=userId).first()
+            userID = random.randint(100000000, 999999999)
+            exists = User.query.filter_by(userID=userID).first()
             if not exists:
                 break
 
@@ -76,7 +76,7 @@ def createAccount():
         emailExists = User.query.filter_by(email=email).first()
 
         if not usernameExists and not emailExists:
-            user = User(userId=userId, username=username, password=hashed_password, email=email, address=address,
+            user = User(userID=userID, username=username, password=hashed_password, email=email, address=address,
                         city=city, state=state, zipCode=zipCode, isAdmin=isAdmin)
             db.session.add(user)
             db.session.commit()
@@ -97,7 +97,7 @@ def createAccount():
 def deleteAccount():
 
     error = None
-    user = User.query.get(session['userId'])
+    user = User.query.get(session['userID'])
     
     if request.method == 'POST':
         if request.form.get('confirm') == 'Yes':
@@ -106,7 +106,7 @@ def deleteAccount():
                 return redirect(url_for('home'))            
             db.session.delete(user)
             db.session.commit()
-            session.pop('userId', None)
+            session.pop('userID', None)
 
             flash('Successfully deleted your account', 'success')
             return redirect(url_for('home'))
@@ -121,7 +121,7 @@ def deleteAccount():
 def editAccount():
     
     error = None
-    user = User.query.get(session['userId'])
+    user = User.query.get(session['userID'])
 
     if request.method == 'POST':
         if request.form.get('confirm') == 'Save Changes':
