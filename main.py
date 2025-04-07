@@ -97,6 +97,9 @@ def viewAccount():
     user = User.query.get(session['userID'])
      if request.method == 'POST':
          if request.form.get('confirm') == 'View':
+             flash ('userID')
+             return redirect(url_for('home'))
+             
 
         
 @app.route('/deleteAccount', methods=['GET', 'POST'])
