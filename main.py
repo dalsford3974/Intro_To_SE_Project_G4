@@ -23,17 +23,6 @@ def login():
 
         dataUser = db.session.execute(db.text("SELECT * FROM users WHERE password=:passwordForm AND userName=:userNameForm"),  {"passwordForm": passwordForm, "userNameForm": userNameForm}).fetchone()
 
-        #dataPass = db.session.execute(db.text("SELECT * FROM users WHERE password=:passwordForm"), {"passwordForm": passwordForm}).fetchone()
-        #dataTest = db.session.execute(db.text("SELECT * FROM users WHERE userName=:userNameForm"), {"userNameForm": userNameForm}).fetchone()
-
-        #print(dataPass)
-        #print(dataTest)
-
-        #print(userNameForm)
-        #print(passwordForm)
-
-        #print(dataUser)
-
         if dataUser == None:
             error = 'Incorrect Username/Password'
         else:
