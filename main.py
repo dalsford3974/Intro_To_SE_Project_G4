@@ -166,6 +166,11 @@ def editAccount():
 def create_tables():
     with app.app_context():
         db.create_all()
+        if User.query.filter_by(userID=0).first() is None:
+            user = User(userID=0, username='admin', password='admin', email='', address='',
+            city='', state='', zipCode='', isAdmin=1)
+            db.session.add(user)
+            db.session.commit()
 
 
 if __name__ == "__main__":
@@ -173,7 +178,4 @@ if __name__ == "__main__":
     app.run(debug=True)
 
 
-user = User(userID=0, username='admin', password='admin', email='', address='',
-            city='', state='', zipCode='', isAdmin=1)
-db.session.add(user)
-db.session.commit()
+
