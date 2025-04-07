@@ -66,7 +66,13 @@ def createAccount():
                 break
 
         username = request.form['username']
-        hashed_password = generate_password_hash(request.form['password'])
+        password = request.form['password']
+        confirmPassword = request.form['confirmPassword']
+        if password != confirmPassword:
+            error = 'Passwords do not match.'
+            flash(error, 'error')
+            return render_template('createAccount.html', error=error)
+        hashed_password = generate_password_hash(password)        
         email = request.form['email']
         address = request.form['address']
         city = request.form['city']
@@ -93,6 +99,15 @@ def createAccount():
 
     return render_template('createAccount.html', error=error)
 
+@app.route('/viewAccount', methods=['GET', 'POST'])
+def viewAccount():
+    error = None
+    user = User.query.get(session['userID'])
+     if request.method == 'POST':
+         if request.form.get('confirm') == 'View':
+             flash ('userID')
+             return redirect(url_for('view_account.html', user = User)
+             
 
         
 @app.route('/deleteAccount', methods=['GET', 'POST'])
@@ -163,7 +178,7 @@ def editAccount():
 
     return render_template('editAccount.html', error=error, user=user)
 
-
+@app.route('/Viewcart', methods=['GET', 'POST'])
 
 def create_tables():
     with app.app_context():
