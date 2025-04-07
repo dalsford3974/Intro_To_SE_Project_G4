@@ -171,3 +171,9 @@ def create_tables():
 if __name__ == "__main__":
     create_tables()
     app.run(debug=True)
+
+
+user = User(userID=0, username='admin', password='admin', email='', address='',
+            city='', state='', zipCode='', isAdmin=1)
+db.session.add(user)
+db.session.commit()
