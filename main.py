@@ -1,15 +1,14 @@
 from flask import Flask, flash, render_template, request, redirect, url_for, session
-from models import db, User
+from models import db, User, Cart, Orders, Inventory, OrderItems
+from flask_sqlalchemy import SQLAlchemy
 import random
 from werkzeug.security import check_password_hash, generate_password_hash
-
 
 
 app = Flask(__name__)
 app.secret_key = "INTRO_TO_SE_PROJECT_G4"
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///introToSE.db'
 db.init_app(app)
-
 
 
 @app.route('/')
@@ -20,14 +19,13 @@ def home():
     return render_template('login.html')
 
 
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     error = None
 
     if request.method == 'POST':
 
-        username = request.form['username']
+        username = request.form['userName']
         password = request.form['password']
 
         existing_user = User.query.filter_by(username=username).first()
@@ -40,13 +38,11 @@ def login():
     return render_template('login.html', error=error)
 
 
-
 @app.route('/logout')
 def logout():
     session.pop('userID', None)
     flash("Logged out successfully!", "info")
     return redirect(url_for('login'))
-
 
 
 @app.route('/createAccount', methods=['GET', 'POST'])
@@ -70,7 +66,7 @@ def createAccount():
             error = 'Passwords do not match.'
             flash(error, 'error')
             return render_template('createAccount.html', error=error)
-        hashed_password = generate_password_hash(password)        
+        hashed_password = generate_password_hash(password)
         email = request.form['email']
         address = request.form['address']
         city = request.form['city']
@@ -88,7 +84,7 @@ def createAccount():
             db.session.commit()
             flash('Successfully created account.', 'success')
             return redirect(url_for('login'))
-        
+
         elif usernameExists:
             error = 'Username already in use.'
 
@@ -97,28 +93,28 @@ def createAccount():
 
     return render_template('createAccount.html', error=error)
 
+
 @app.route('/viewAccount', methods=['GET', 'POST'])
 def viewAccount():
     error = None
     user = User.query.get(session['userID'])
     if request.method == 'POST':
-         if request.form.get('confirm') == 'View':
-             flash ('userID')
-             return redirect(url_for('view_account.html', user = User))
-             
+        if request.form.get('confirm') == 'View':
+            flash('userID')
+            return redirect(url_for('view_account.html', user=User))
 
-        
+
 @app.route('/deleteAccount', methods=['GET', 'POST'])
 def deleteAccount():
 
     error = None
     user = User.query.get(session['userID'])
-    
+
     if request.method == 'POST':
         if request.form.get('confirm') == 'Yes':
             if user.isAdmin:
                 flash('Cannot delete admin account.', 'error')
-                return redirect(url_for('home'))            
+                return redirect(url_for('home'))
             db.session.delete(user)
             db.session.commit()
             session.pop('userID', None)
@@ -128,13 +124,13 @@ def deleteAccount():
         else:
             flash("Cancelling deletion.", 'info')
             return redirect(url_for('home'))
-        
+
     return render_template('deleteAccount.html', error=error)
 
 
 @app.route('/editAccount', methods=['GET', 'POST'])
 def editAccount():
-    
+
     error = None
     user = User.query.get(session['userID'])
 
@@ -143,7 +139,7 @@ def editAccount():
             if user.isAdmin:
                 flash('Cannot edit admin account.', 'error')
                 return redirect(url_for('home'))
-            
+
             username = request.form['username']
             if username:
                 user.username = username
@@ -164,17 +160,18 @@ def editAccount():
                 user.state = state
             zipCode = request.form['zipCode']
             if zipCode:
-                user.zipCode= zipCode
+                user.zipCode = zipCode
 
             db.session.commit()
             flash('Saved changes.', 'info')
             return redirect(url_for('home'))
-        
+
         else:
             flash('Discarding changes.')
-            return redirect(url_for('home'))        
+            return redirect(url_for('home'))
 
     return render_template('editAccount.html', error=error, user=user)
+
 
 @app.route('/AddToCart', methods=['GET', 'POST'])
 def AddToCart():
@@ -182,28 +179,27 @@ def AddToCart():
     cart = Cart.query.get(session['cartID'])
     if request.method == 'POST':
         if request.form.get('confirm') == 'Save Changes':
-            if user.isAdmin:
-               flash('Cannot purchase items', 'error')
-               return redirect(url_for('home'))
+            if User.isAdmin:
+                flash('Cannot purchase items', 'error')
+                return redirect(url_for('home'))
             else:
                 cart = request.form['cart']
-         
+
                 db.session.commit()
                 flash('added to cart successfully')
                 return redirect(url_for('cart.html'))
-        
+
         else:
-            return redirect(url_for('home'))  
+            return redirect(url_for('home'))
 
 
 @app.route('/Viewcart', methods=['GET', 'POST'])
-
 def create_tables():
     with app.app_context():
         db.create_all()
         if User.query.filter_by(userID=0).first() is None:
-            user = User(userID=0, username='admin', password='admin', email='', address='',
-            city='', state='', zipCode='', isAdmin=1)
+            user = User(userID=0, username='admin', password=generate_password_hash('admin'), email='', address='',
+                        city='', state='', zipCode='', isAdmin=1)
             db.session.add(user)
             db.session.commit()
 
