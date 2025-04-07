@@ -1,5 +1,5 @@
 from flask import Flask, flash, render_template, request, redirect, url_for, session
-from models import db, User, Class
+from models import db, User
 import random
 from werkzeug.security import check_password_hash, generate_password_hash
 
