@@ -170,7 +170,7 @@ def editAccount():
 
     return render_template('editAccount.html', error=error, user=user)
 
-
+@app.route('/Viewcart', methods=['GET', 'POST'])
 
 def create_tables():
     with app.app_context():
