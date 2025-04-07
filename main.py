@@ -26,11 +26,24 @@ def login():
     error = None
 
     if request.method == 'POST':
-
         username = request.form['username']
         password = request.form['password']
 
         existing_user = User.query.filter_by(username=username).first()
+
+        print(f"Username from form: {username}")  # Debugging
+        print(f"Password from form: {password}")  # Debugging
+
+        if existing_user:
+            print(f"User found in database: {existing_user.username}")  # Debugging
+            print(f"Hashed password from database: {existing_user.password}")  # Debugging
+            if check_password_hash(existing_user.password, password):
+                print("Password matches!")  # Debugging
+            else:
+                print("Password does NOT match!")  # Debugging
+        else:
+            print("No user found with that username.")  # Debugging
+
         if not existing_user or not check_password_hash(existing_user.password, password):
             error = 'Incorrect Username/Password'
         else:
@@ -38,7 +51,6 @@ def login():
             flash("Logged in successfully!", 'success')
             return redirect(url_for('home'))
     return render_template('login.html', error=error)
-
 
 
 @app.route('/logout')
@@ -173,7 +185,7 @@ def create_tables():
     with app.app_context():
         db.create_all()
         if User.query.filter_by(userID=0).first() is None:
-            user = User(userID=0, username='admin', password='admin', email='', address='',
+            user = User(userID=0, username='admin', password=generate_password_hash('admin'), email='', address='',
             city='', state='', zipCode='', isAdmin=1)
             db.session.add(user)
             db.session.commit()
