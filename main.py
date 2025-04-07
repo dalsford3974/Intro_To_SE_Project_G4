@@ -101,10 +101,10 @@ def createAccount():
 def viewAccount():
     error = None
     user = User.query.get(session['userID'])
-     if request.method == 'POST':
+    if request.method == 'POST':
          if request.form.get('confirm') == 'View':
              flash ('userID')
-             return redirect(url_for('view_account.html', user = User)
+             return redirect(url_for('view_account.html', user = User))
              
 
         
