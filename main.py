@@ -91,6 +91,12 @@ def createAccount():
 
     return render_template('createAccount.html', error=error)
 
+@app.route('/viewAccount', methods=['GET', 'POST'])
+def viewAccount():
+    error = None
+    user = User.query.get(session['userID'])
+     if request.method == 'POST':
+         if request.form.get('confirm') == 'View':
 
         
 @app.route('/deleteAccount', methods=['GET', 'POST'])
