@@ -1,16 +1,16 @@
-from flask import Flask, request, jsonify, session
-from models import db, User
+from sqlalchemy import Column, Integer, String, Time, ForeignKey
+from sqlalchemy.orm import relationship
 from flask_sqlalchemy import SQLAlchemy
-import sys
-import random
-import sqlite3
+from sqlalchemy import Numeric
 
-class User:
+db = SQLAlchemy()
+
+class User(db.User):
 
     ## constructor
-    def __init__(self, databaseName="website.db"):
-        self.databaseName = databaseName
-
+    def __init__(self, database_name):
+        self.database = make_database(database_name)
+        self.connection = connectcreater(bind = self.database)
         self.loggedIn = False
         self.userID = ""
 
@@ -22,7 +22,7 @@ class User:
 
         ## setup database and query the database
         
-        connection = sqlite3.connect(self.databaseName)
+        connection = self.connect()
         cursor = connection.cursor()
 
         ## sets up query and uses user input for the constraint
@@ -40,6 +40,7 @@ class User:
             ## these are mainly set for safety's sake
             self.userID = ""
             self.loggedIn = False
+           
 
             return False
 
@@ -82,7 +83,7 @@ class User:
     def viewAccountInformation(self):
         ## setup database and query the database
         try:
-            connection = sqlite3.connect(self.databaseName)
+            connection = self.connect
 
         except:
             print("Failed database connection.")

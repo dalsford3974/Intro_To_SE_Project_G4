@@ -8,6 +8,7 @@ from werkzeug.security import check_password_hash, generate_password_hash
 app = Flask(__name__)
 app.secret_key = "INTRO_TO_SE_PROJECT_G4"
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///introToSE.db'
+app.secret_key = 'test'
 db.init_app(app)
 
 
@@ -26,31 +27,20 @@ def login():
     error = None
 
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
 
-        existing_user = User.query.filter_by(username=username).first()
+        userNameForm = request.form.get('userName')
+        passwordForm = request.form.get('password')
 
-        print(f"Username from form: {username}")  # Debugging
-        print(f"Password from form: {password}")  # Debugging
+        dataUser = db.session.execute(db.text("SELECT * FROM users WHERE password=:passwordForm AND userName=:userNameForm"),  {"passwordForm": passwordForm, "userNameForm": userNameForm}).fetchone()
 
-        if existing_user:
-            print(f"User found in database: {existing_user.username}")  # Debugging
-            print(f"Hashed password from database: {existing_user.password}")  # Debugging
-            if check_password_hash(existing_user.password, password):
-                print("Password matches!")  # Debugging
-            else:
-                print("Password does NOT match!")  # Debugging
-        else:
-            print("No user found with that username.")  # Debugging
-
-        if not existing_user or not check_password_hash(existing_user.password, password):
+        if dataUser == None:
             error = 'Incorrect Username/Password'
         else:
             session['userID'] = existing_user.userID
             flash("Logged in successfully!", 'success')
             return redirect(url_for('home'))
     return render_template('login.html', error=error)
+
 
 
 @app.route('/logout')
@@ -109,6 +99,15 @@ def createAccount():
 
     return render_template('createAccount.html', error=error)
 
+@app.route('/viewAccount', methods=['GET', 'POST'])
+def viewAccount():
+    error = None
+    user = User.query.get(session['userID'])
+    if request.method == 'POST':
+         if request.form.get('confirm') == 'View':
+             flash ('userID')
+             return redirect(url_for('view_account.html', user = User))
+             
 
         
 @app.route('/deleteAccount', methods=['GET', 'POST'])
@@ -179,13 +178,13 @@ def editAccount():
 
     return render_template('editAccount.html', error=error, user=user)
 
-
+@app.route('/Viewcart', methods=['GET', 'POST'])
 
 def create_tables():
     with app.app_context():
         db.create_all()
         if User.query.filter_by(userID=0).first() is None:
-            user = User(userID=0, username='admin', password=generate_password_hash('admin'), email='', address='',
+            user = User(userID=0, username='admin', password='admin', email='', address='',
             city='', state='', zipCode='', isAdmin=1)
             db.session.add(user)
             db.session.commit()
