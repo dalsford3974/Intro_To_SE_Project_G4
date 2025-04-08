@@ -182,8 +182,8 @@ def AddToCart():
                 flash('Cannot purchase items', 'error')
                 return redirect(url_for('home'))
             else:
-                cart = request.form['cart']
-
+                
+                cart.quantity += quantity
                 db.session.commit()
                 flash('added to cart successfully')
                 return redirect(url_for('cart.html'))
