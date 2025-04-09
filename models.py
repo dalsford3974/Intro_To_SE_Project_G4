@@ -2,11 +2,12 @@ from sqlalchemy import Column, Integer, String, Time, ForeignKey
 from sqlalchemy.orm import relationship
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Numeric
+from flask_login import UserMixin
 
 db = SQLAlchemy()
 
 
-class User(db.Model):
+class User(db.Model, UserMixin):
     __tablename__ = 'users'
     userID = Column(Integer, primary_key=True)
     username = Column(String(50), nullable=False)
@@ -18,6 +19,8 @@ class User(db.Model):
     zipCode = Column(String(50), nullable=False)
     isAdmin = Column(Integer, nullable=False)
 
+    def get_id(self):
+        return str(self.userID)
 
 class Inventory(db.Model):
     __tablename__ = 'inventory'

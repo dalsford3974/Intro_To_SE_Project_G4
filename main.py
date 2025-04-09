@@ -1,6 +1,7 @@
 from flask import Flask, flash, render_template, request, redirect, url_for, session
 from models import db, User, Cart, Orders, Inventory, OrderItems
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, UserMixin, login_required, current_user, login_user, logout_user
 import random
 from werkzeug.security import check_password_hash, generate_password_hash
 
@@ -10,12 +11,20 @@ app.secret_key = "INTRO_TO_SE_PROJECT_G4"
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///introToSE.db'
 db.init_app(app)
 
+login = LoginManager(app)
+login.init_app(app)
+login.login_view = 'login'
+login.login_message = "Please log in to access this page."
+
+
+@login.user_loader
+def load_user(id):
+    return db.session.get(User, int(id))
 
 @app.route('/')
 def home():
-    if 'userID' in session:
-        user = User.query.get(session['userID'])
-        return render_template('home.html')
+    if current_user.is_authenticated:
+        return render_template('home.html', user=current_user)
     return render_template('login.html')
 
 
@@ -32,7 +41,7 @@ def login():
         if not existing_user or not check_password_hash(existing_user.password, password):
             error = 'Incorrect Username/Password'
         else:
-            session['userID'] = existing_user.userID
+            login_user(existing_user)
             flash("Logged in successfully!", 'success')
             return redirect(url_for('home'))
     return render_template('login.html', error=error)
@@ -40,7 +49,7 @@ def login():
 
 @app.route('/logout')
 def logout():
-    session.pop('userID', None)
+    logout_user()
     flash("Logged out successfully!", "info")
     return redirect(url_for('login'))
 
@@ -95,10 +104,10 @@ def createAccount():
 
 
 @app.route('/viewAccount', methods=['GET', 'POST'])
+@login_required
 def viewAccount():
-    if 'userID' in session:
-        user = User.query.get(session['userID'])
-        return render_template('viewAccount.html', account=user)
+    if current_user.is_authenticated:
+        return render_template('viewAccount.html', user=current_user)
     else:
         return redirect(url_for('login'))
 
@@ -128,49 +137,23 @@ def deleteAccount():
 
 
 @app.route('/editAccount', methods=['GET', 'POST'])
+@login_required
 def editAccount():
-
-    error = None
-    user = User.query.get(session['userID'])
-
     if request.method == 'POST':
-        if request.form.get('confirm') == 'Save Changes':
-            if user.isAdmin:
-                flash('Cannot edit admin account.', 'error')
-                return redirect(url_for('home'))
+        # Update the currently logged-in user's account details
+        current_user.username = request.form['username']
+        current_user.email = request.form['email']
+        current_user.address = request.form['address']
+        current_user.city = request.form['city']
+        current_user.state = request.form['state']
+        current_user.zipCode = request.form['zipCode']
 
-            username = request.form['username']
-            if username:
-                user.username = username
-            password = request.form['password']
-            if password:
-                user.password = generate_password_hash(password)
-            email = request.form['email']
-            if email:
-                user.email = email
-            address = request.form['address']
-            if address:
-                user.address = address
-            city = request.form['city']
-            if city:
-                user.city = city
-            state = request.form['state']
-            if state:
-                user.state = state
-            zipCode = request.form['zipCode']
-            if zipCode:
-                user.zipCode = zipCode
+        db.session.commit()
+        flash("Account details updated successfully!", "success")
+        return redirect(url_for('viewAccount'))
 
-            db.session.commit()
-            flash('Saved changes.', 'info')
-            return redirect(url_for('home'))
-
-        else:
-            flash('Discarding changes.')
-            return redirect(url_for('home'))
-
-    return render_template('editAccount.html', error=error, user=user)
-
+    # Render the edit account page with the current user's details
+    return render_template('editAccount.html', user=current_user)
 
 @app.route('/AddToCart', methods=['GET', 'POST'])
 def AddToCart():

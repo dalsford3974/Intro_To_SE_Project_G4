@@ -5,32 +5,36 @@
     <h2>Account Details</h2>
         <div class="mb-3">
             <label for="username" class="form-label">Username:</label>
-            <input type="text" class="form-control" id="username" name="username" value="{{ account.username }}" readonly>
+            <input type="text" class="form-control" id="username" name="username" value="{{ user.username }}" readonly>
         </div>
 
         <div class="mb-3">
             <label for="email" class="form-label">Email:</label>
-            <input type="email" class="form-control" id="email" name="email" value="{{ account.email }}" readonly>
+            <input type="email" class="form-control" id="email" name="email" value="{{ user.email }}" readonly>
         </div>
 
         <div class="mb-3">
             <label for="address" class="form-label">Address:</label>
-            <input type="text" class="form-control" id="address" name="address" value="{{ account.address }}" readonly>
+            <input type="text" class="form-control" id="address" name="address" value="{{ user.address }}" readonly>
         </div>
 
         <div class="mb-3">
             <label for="city" class="form-label">City:</label>
-            <input type="text" class="form-control" id="city" name="city" value="{{ account.city }}" readonly>
+            <input type="text" class="form-control" id="city" name="city" value="{{ user.city }}" readonly>
         </div>
 
         <div class="mb-3">
             <label for="state" class="form-label">State:</label>
-            <input type="text" class="form-control" id="state" name="state" value="{{ account.state }}" readonly>
+            <input type="text" class="form-control" id="state" name="state" value="{{ user.state }}" readonly>
         </div>
 
         <div class="mb-3">
             <label for="zipcode" class="form-label">Zip Code:</label>
-            <input type="text" class="form-control" id="zipcode" name="zipCode" value="{{ account.zipCode }}" readonly>
+            <input type="text" class="form-control" id="zipcode" name="zipCode" value="{{ user.zipCode }}" readonly>
+        </div>
+
+        <div class="mt-4">
+            <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
         </div>
 </div>
 
