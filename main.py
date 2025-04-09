@@ -112,28 +112,24 @@ def viewAccount():
         return redirect(url_for('login'))
 
 
-@app.route('/deleteAccount', methods=['GET', 'POST'])
+@app.route('/deleteAccount', methods=['POST'])
+@login_required
 def deleteAccount():
+    print("Delete account route triggered.")
+    print(f"Attempting to delete user: {current_user.username}, ID: {current_user.userID}, isAdmin: {current_user.isAdmin}")
+    # Prevent deletion of the admin account
+    if current_user.userID == 0:
+        flash('Cannot delete admin account.', 'error')
+        return redirect(url_for('home'))
 
-    error = None
-    user = User.query.get(session['userID'])
+    # Delete the currently logged-in user's account
+    db.session.delete(current_user)
+    db.session.commit()
 
-    if request.method == 'POST':
-        if request.form.get('confirm') == 'Yes':
-            if user.isAdmin:
-                flash('Cannot delete admin account.', 'error')
-                return redirect(url_for('home'))
-            db.session.delete(user)
-            db.session.commit()
-            session.pop('userID', None)
-
-            flash('Successfully deleted your account', 'success')
-            return redirect(url_for('home'))
-        else:
-            flash("Cancelling deletion.", 'info')
-            return redirect(url_for('home'))
-
-    return render_template('deleteAccount.html', error=error)
+    # Log out the user after deleting the account
+    logout_user()
+    flash('Your account has been successfully deleted.', 'success')
+    return redirect(url_for('home'))
 
 
 @app.route('/editAccount', methods=['GET', 'POST'])
