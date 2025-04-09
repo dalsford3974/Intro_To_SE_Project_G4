@@ -170,6 +170,52 @@ def AddToCart():
         else:
             return redirect(url_for('home'))
 
+#ADMIN STUFF
+
+@app.route('/adminDashboard', methods=['GET'])
+@login_required
+def adminDashboard():
+    # Ensure only admins can access this page
+    if not current_user.isAdmin:
+        flash('You do not have permission to access this page.', 'error')
+        return redirect(url_for('home'))
+
+    # Get the search query from the request arguments
+    search_query = request.args.get('search', '')
+
+    # Query the database for users
+    if search_query:
+        users = User.query.filter(
+            ((User.username.ilike(f"%{search_query}%")) | (User.email.ilike(f"%{search_query}%"))) &
+            (User.isAdmin == False)  # Exclude admin accounts
+        ).all()
+    else:
+        users = User.query.filter_by(isAdmin=False).all()
+
+    return render_template('adminDashboard.html', users=users)
+
+@app.route('/deleteUser/<int:user_id>', methods=['POST'])
+@login_required
+def deleteUser(user_id):
+    # Ensure only admins can delete accounts
+    if not current_user.isAdmin:
+        flash('You do not have permission to perform this action.', 'error')
+        return redirect(url_for('home'))
+
+    # Prevent deletion of the admin account
+    if user_id == current_user.userID:
+        flash('You cannot delete your own account.', 'error')
+        return redirect(url_for('adminDashboard'))
+
+    user = User.query.get(user_id)
+    if not user:
+        flash('User not found.', 'error')
+        return redirect(url_for('adminDashboard'))
+
+    db.session.delete(user)
+    db.session.commit()
+    flash(f'User {user.username} has been deleted.', 'success')
+    return redirect(url_for('adminDashboard'))
 
 @app.route('/Viewcart', methods=['GET', 'POST'])
 def create_tables():
