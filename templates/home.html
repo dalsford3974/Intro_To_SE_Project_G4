@@ -6,7 +6,16 @@
     <title>Home Page</title>
     <link href="https://cdn.jsdelivr.net/npm/bootswatch@5.3.2/dist/lux/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" rel="stylesheet">
+    <!-- Link to search icons https://fontawesome.com/search?o=r&s=solid&ip=classic-->
 </head>
+<style>
+    body {
+        background-color:rgb(253, 249, 245);
+    }
+    .navbar-brand {
+        color: rgb(129, 205, 160);
+    }
+</style>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <div class="container-fluid">
@@ -23,12 +32,19 @@
                     <li class="nav-item">
                         <a class="nav-link" href="/viewAccount"><i class="fas fa-user"></i> View Account</a>
                     </li>
+                    {% if current_user.userID != 0 %}
                     <li class="nav-item">
                         <a class="nav-link" href="/cart"><i class="fas fa-shopping-cart"></i> Cart</a>
                     </li>
+                    {% endif %}
                     {% if current_user.userID == 0 %}
                     <li class="nav-item">
-                        <a class="nav-link" href="/adminDashboard"><i class="fas fa-cog"></i> Admin</a>
+                        <a class="nav-link" href="/adminDashboard"><i class="fas fa-cog"></i> User Dashboard</a>
+                    </li>
+                    {% endif %}
+                    {% if current_user.userID == 0 %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/inventory"><i class="fas fa-cog"></i> Inventory Dashboard</a>
                     </li>
                     {% endif %}
                     {% else %}
