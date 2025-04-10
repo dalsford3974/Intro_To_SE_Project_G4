@@ -32,10 +32,15 @@
             <label for="zipcode" class="form-label">Zip Code:</label>
             <input type="text" class="form-control" id="zipcode" name="zipCode" value="{{ user.zipCode }}" readonly>
         </div>
+        
+        <div class="mt-4">
+            <a href="{{ url_for('editAccount') }}" class="btn btn-primary">edit</a>
+        </div>
 
         <div class="mt-4">
             <a href="{{ url_for('logout') }}" class="btn btn-danger">Logout</a>
         </div>
+        
 </div>
 
 {% endblock %}
