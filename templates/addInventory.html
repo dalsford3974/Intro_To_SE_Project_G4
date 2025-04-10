@@ -1,0 +1,29 @@
+{% extends "home.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Add Inventory</h2>
+    <form method="POST" action="/addInventory" enctype="multipart/form-data">
+        <div class="mb-3">
+            <label for="title" class="form-label">Item Name</label>
+            <input type="text" class="form-control" id="title" name="title" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="price" class="form-label">Price:</label>
+            <input type="number" class="form-control" id="price" name="price" step="0.01" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="quantity" class="form-label">Quantity:</label>
+            <input type="number" class="form-control" id="quantity" name="quantity" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="image" class="form-label">Product Image:</label>
+            <input type="file" class="form-control" id="image" name="image" accept="image/*">
+        </div>
+
+        <button type="submit" class="btn btn-primary">Add Item</button>
+    </form>
+</div>
+{% endblock %}

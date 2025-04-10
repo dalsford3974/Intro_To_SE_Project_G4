@@ -4,6 +4,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_required, current_user, login_user, logout_user
 import random
 from werkzeug.security import check_password_hash, generate_password_hash
+import os
+from werkzeug.utils import secure_filename
 
 
 app = Flask(__name__)
@@ -20,6 +22,7 @@ login.login_message = "Please log in to access this page."
 @login.user_loader
 def load_user(id):
     return db.session.get(User, int(id))
+
 
 @app.route('/')
 def home():
@@ -116,7 +119,8 @@ def viewAccount():
 @login_required
 def deleteAccount():
     print("Delete account route triggered.")
-    print(f"Attempting to delete user: {current_user.username}, ID: {current_user.userID}, isAdmin: {current_user.isAdmin}")
+    print(
+        f"Attempting to delete user: {current_user.username}, ID: {current_user.userID}, isAdmin: {current_user.isAdmin}")
     # Prevent deletion of the admin account
     if current_user.userID == 0:
         flash('Cannot delete admin account.', 'error')
@@ -151,6 +155,7 @@ def editAccount():
     # Render the edit account page with the current user's details
     return render_template('editAccount.html', user=current_user)
 
+
 @app.route('/AddToCart', methods=['GET', 'POST'])
 def AddToCart():
     error = None
@@ -161,7 +166,7 @@ def AddToCart():
                 flash('Cannot purchase items', 'error')
                 return redirect(url_for('home'))
             else:
-                
+
                 cart.quantity += quantity
                 db.session.commit()
                 flash('added to cart successfully')
@@ -170,7 +175,8 @@ def AddToCart():
         else:
             return redirect(url_for('home'))
 
-#ADMIN STUFF
+# ADMIN STUFF
+
 
 @app.route('/adminDashboard', methods=['GET'])
 @login_required
@@ -193,6 +199,7 @@ def adminDashboard():
         users = User.query.filter_by(isAdmin=False).all()
 
     return render_template('adminDashboard.html', users=users)
+
 
 @app.route('/deleteUser/<int:user_id>', methods=['POST'])
 @login_required
@@ -217,6 +224,7 @@ def deleteUser(user_id):
     flash(f'User {user.username} has been deleted.', 'success')
     return redirect(url_for('adminDashboard'))
 
+
 @app.route('/Viewcart', methods=['GET', 'POST'])
 def create_tables():
     with app.app_context():
@@ -227,10 +235,55 @@ def create_tables():
             db.session.add(user)
             db.session.commit()
 
+
 @app.route('/inventory', methods=['GET', 'POST'])
 def inventory():
     # display the full inventory to admin
     return render_template('inventory.html', inventory=Inventory.query.all())
+
+
+@app.route('/addInventory', methods=['GET', 'POST'])
+def addInventory():
+    if request.method == 'POST':
+        try:
+            title = request.form['title']
+            sellerID = current_user.userID
+            price = request.form['price']
+            quantity = request.form['quantity']
+
+            # Handle image upload
+            image_path = None
+            if 'image' in request.files:
+                image = request.files['image']
+                if image.filename != '':
+                    # Ensure the upload folder exists
+                    upload_folder = os.path.join(
+                        app.root_path, 'static', 'products')
+                    os.makedirs(upload_folder, exist_ok=True)
+
+                    # Secure the filename and save the file
+                    filename = secure_filename(image.filename)
+                    image_path = f'products/{filename}'
+                    image.save(os.path.join(upload_folder, filename))
+
+            inventory_item = Inventory(
+                title=title,
+                sellerID=sellerID,
+                price=price,
+                stock=quantity,
+                image=image_path
+            )
+            db.session.add(inventory_item)
+            db.session.commit()
+            flash('Item added to inventory successfully!', 'success')
+            return redirect(url_for('inventory'))
+        except Exception as e:
+            flash(f'Error adding item: {str(e)}', 'error')
+            return redirect(url_for('addInventory'))
+
+    return render_template('addInventory.html')
+
+
 if __name__ == "__main__":
     create_tables()
     app.run(debug=True)

@@ -15,6 +15,9 @@
     .navbar-brand {
         color: rgb(129, 205, 160);
     }
+    .navbar-nav .nav-link:hover {
+        color: rgb(184, 184, 184);
+    }
 </style>
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
@@ -35,6 +38,11 @@
                     {% if current_user.userID != 0 %}
                     <li class="nav-item">
                         <a class="nav-link" href="/cart"><i class="fas fa-shopping-cart"></i> Cart</a>
+                    </li>
+                    {% endif %}
+                    {% if current_user.userID != 0 %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/addInventory"><i class="fas fa-plus"></i> Add Item</a>
                     </li>
                     {% endif %}
                     {% if current_user.userID == 0 %}
