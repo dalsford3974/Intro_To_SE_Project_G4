@@ -227,7 +227,10 @@ def create_tables():
             db.session.add(user)
             db.session.commit()
 
-
+@app.route('/inventory', methods=['GET', 'POST'])
+def inventory():
+    # display the full inventory to admin
+    return render_template('inventory.html', inventory=Inventory.query.all())
 if __name__ == "__main__":
     create_tables()
     app.run(debug=True)
