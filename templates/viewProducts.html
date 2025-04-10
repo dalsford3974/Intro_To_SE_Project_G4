@@ -1,26 +1,23 @@
 {% extends "home.html" %}
 {% block content %}
-
 <div class="container mt-4">
-    <h2>Complete Inventory Dashboard</h2>
+    <h2>Product List</h2>
     <table class="table table-bordered">
         <thead>
             <tr>
                 <th>Item Name</th>
                 <th>Price</th>
                 <th>Quantity</th>
-                <th>Seller Name</th>
                 <th>Image</th>
                 <th>Actions</th>
             </tr>
         </thead>
         <tbody>
-            {% for product, seller_name in products %}
+            {% for product in products %}
             <tr>
                 <td>{{ product.title }}</td>
                 <td>${{ "%.2f"|format(product.price) }}</td>
                 <td>{{ product.stock }}</td>
-                <td>{{ seller_name }}</td>
                 <td>
                     <img src="{{ url_for('static', filename=product.image) }}" alt="{{ product.title }}" width="100">
                 </td>
@@ -33,5 +30,8 @@
             {% endfor %}
         </tbody>
     </table>
+    <div class="mt-4">
+        <a href="{{ url_for('addInventory') }}" class="btn btn-primary">Add New Product</a>
+    </div>
 </div>
 {% endblock %}
