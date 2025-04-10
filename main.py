@@ -289,26 +289,20 @@ def viewInventory():
 @app.route('/deleteInventory/<int:item_id>', methods=['POST'])
 @login_required
 def deleteInventory(item_id):
-    # Get item by itemID instead of inventoryID
     item = Inventory.query.get_or_404(item_id)
 
     # Verify the current user owns this item or is an admin
     if item.sellerID != current_user.userID and not current_user.isAdmin:
-        flash('You do not have permission to delete this item.', 'error')
         return redirect(url_for('viewInventory'))
 
-    try:
-        if item.image:
-            image_path = os.path.join(app.root_path, 'static', item.image)
-            if os.path.exists(image_path):
-                os.remove(image_path)
+    if item.image:
+        image_path = os.path.join(app.root_path, 'static', item.image)
+        if os.path.exists(image_path):
+            os.remove(image_path)
 
-        db.session.delete(item)
-        db.session.commit()
-        flash('Item deleted successfully!', 'success')
-    except Exception as e:
-        db.session.rollback()
-        flash(f'Error deleting item: {str(e)}', 'error')
+    db.session.delete(item)
+    db.session.commit()
+    flash('Item deleted successfully!', 'success')
 
     if current_user.isAdmin:
         return render_template('sellerDashboard.html', products=Inventory.query.all())
@@ -319,9 +313,6 @@ def deleteInventory(item_id):
 @app.route('/sellerDashboard', methods=['GET'])
 @login_required
 def sellerDashboard():
-    if not current_user.isAdmin:
-        flash('You do not have permission to access this page.', 'error')
-        return redirect(url_for('home'))
     # Join Inventory with User to get seller information
     products = db.session.query(Inventory, User.username)\
         .join(User, Inventory.sellerID == User.userID)\
