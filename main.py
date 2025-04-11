@@ -4,6 +4,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_required, current_user, login_user, logout_user
 import random
 from werkzeug.security import check_password_hash, generate_password_hash
+import os
+from werkzeug.utils import secure_filename
 
 
 app = Flask(__name__)
@@ -116,7 +118,8 @@ def viewAccount():
 @login_required
 def deleteAccount():
     print("Delete account route triggered.")
-    print(f"Attempting to delete user: {current_user.username}, ID: {current_user.userID}, isAdmin: {current_user.isAdmin}")
+    print(
+        f"Attempting to delete user: {current_user.username}, ID: {current_user.userID}, isAdmin: {current_user.isAdmin}")
     # Prevent deletion of the admin account
     if current_user.userID == 0:
         flash("Cannot delete admin account.", "error")
@@ -183,7 +186,8 @@ def addToCart():
         flash("Item added to cart.", "success")
         return redirect(request.referrer or url_for("home"))
 
-#ADMIN STUFF
+# ADMIN STUFF
+
 
 @app.route("/adminDashboard", methods=["GET"])
 @login_required
@@ -239,6 +243,90 @@ def create_tables():
                         city="", state="", zipCode="", isAdmin=1)
             db.session.add(user)
             db.session.commit()
+
+
+@app.route('/addInventory', methods=['GET', 'POST'])
+def addInventory():
+    if request.method == 'POST':
+        try:
+            title = request.form['title']
+            sellerID = current_user.userID
+            price = request.form['price']
+            quantity = request.form['quantity']
+
+            # Handle image upload
+            image_path = None
+            if 'image' in request.files:
+                image = request.files['image']
+                if image.filename != '':
+                    # Ensure the upload folder exists
+                    upload_folder = os.path.join(
+                        app.root_path, 'static', 'products')
+                    os.makedirs(upload_folder, exist_ok=True)
+
+                    # Secure the filename and save the file
+                    filename = secure_filename(image.filename)
+                    image_path = f'products/{filename}'
+                    image.save(os.path.join(upload_folder, filename))
+
+            inventory_item = Inventory(
+                title=title,
+                sellerID=sellerID,
+                price=price,
+                stock=quantity,
+                image=image_path
+            )
+            db.session.add(inventory_item)
+            db.session.commit()
+            flash('Item added to inventory successfully!', 'success')
+            return redirect(url_for('inventory'))
+        except Exception as e:
+            flash(f'Error adding item: {str(e)}', 'error')
+            return redirect(url_for('addInventory'))
+
+    return render_template('addInventory.html')
+
+
+@app.route('/viewProducts/', methods=['GET', 'POST'])
+@login_required  # Add login required decorator
+def viewInventory():
+    userID = current_user.userID
+    inventory = Inventory.query.filter_by(sellerID=userID).all()
+    return render_template('viewProducts.html', products=inventory)
+
+
+@app.route('/deleteInventory/<int:item_id>', methods=['POST'])
+@login_required
+def deleteInventory(item_id):
+    item = Inventory.query.get_or_404(item_id)
+
+    # Verify the current user owns this item or is an admin
+    if item.sellerID != current_user.userID and not current_user.isAdmin:
+        return redirect(url_for('viewInventory'))
+
+    if item.image:
+        image_path = os.path.join(app.root_path, 'static', item.image)
+        if os.path.exists(image_path):
+            os.remove(image_path)
+
+    db.session.delete(item)
+    db.session.commit()
+    flash('Item deleted successfully!', 'success')
+
+    if current_user.isAdmin:
+        return render_template('sellerDashboard.html', products=Inventory.query.all())
+    else:
+        return render_template('viewProducts.html', products=Inventory.query.filter_by(sellerID=current_user.userID).all())
+
+
+@app.route('/sellerDashboard', methods=['GET'])
+@login_required
+def sellerDashboard():
+    # Join Inventory with User to get seller information
+    products = db.session.query(Inventory, User.username)\
+        .join(User, Inventory.sellerID == User.userID)\
+        .all()
+    return render_template('sellerDashboard.html', products=products)
 
 
 if __name__ == "__main__":

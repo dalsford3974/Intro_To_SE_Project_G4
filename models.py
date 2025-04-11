@@ -22,6 +22,7 @@ class User(db.Model, UserMixin):
     def get_id(self):
         return str(self.userID)
 
+
 class Inventory(db.Model):
     __tablename__ = 'inventory'
     itemID = Column(Integer, primary_key=True)
@@ -29,6 +30,7 @@ class Inventory(db.Model):
     sellerID = Column(Integer, ForeignKey('users.userID'), nullable=False)
     price = Column(Numeric(10, 2), nullable=False)
     stock = Column(Integer, nullable=False)
+    image = Column(String(255), nullable=True)  # Add this line
 
 
 class Cart(db.Model):
@@ -36,6 +38,7 @@ class Cart(db.Model):
     userID = Column(Integer, ForeignKey('users.userID'), primary_key=True, nullable=False)
     itemID = Column(Integer, ForeignKey('inventory.itemID'), nullable=False)
     quantity = Column(Integer, nullable=False)
+    image = Column(String(50), nullable=False)
 
 
 class Orders(db.Model):

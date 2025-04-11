@@ -1,0 +1,37 @@
+{% extends "home.html" %}
+{% block content %}
+
+<div class="container mt-4">
+    <h2>Complete Inventory Dashboard</h2>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Item Name</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Seller Name</th>
+                <th>Image</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product, seller_name in products %}
+            <tr>
+                <td>{{ product.title }}</td>
+                <td>${{ "%.2f"|format(product.price) }}</td>
+                <td>{{ product.stock }}</td>
+                <td>{{ seller_name }}</td>
+                <td>
+                    <img src="{{ url_for('static', filename=product.image) }}" alt="{{ product.title }}" width="100">
+                </td>
+                <td>
+                    <form action="{{ url_for('deleteInventory', item_id=product.itemID) }}" method="POST" style="display: inline;">
+                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this item?')">Delete</button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
