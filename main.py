@@ -23,10 +23,12 @@ login.login_message = "Please log in to access this page."
 def load_user(id):
     return db.session.get(User, int(id))
 
+
 @app.route("/")
 def home():
     if current_user.is_authenticated:
-        return render_template("home.html", user=current_user)
+        items = Inventory.query.all()
+        return render_template("home.html", user=current_user, items=items)
     return render_template("login.html")
 
 
@@ -154,6 +156,7 @@ def editAccount():
     # Render the edit account page with the current user"s details
     return render_template("editAccount.html", user=current_user)
 
+
 @app.route("/addToCart", methods=["GET", "POST"])
 @login_required
 def addToCart():
@@ -211,6 +214,7 @@ def adminDashboard():
 
     return render_template("adminDashboard.html", users=users)
 
+
 @app.route("/deleteUser/<int:user_id>", methods=["POST"])
 @login_required
 def deleteUser(user_id):
@@ -234,15 +238,14 @@ def deleteUser(user_id):
     flash(f"User {user.username} has been deleted.", "success")
     return redirect(url_for("adminDashboard"))
 
-@app.route("/viewCart", methods=["GET", "POST"])
-def create_tables():
-    with app.app_context():
-        db.create_all()
-        if User.query.filter_by(userID=0).first() is None:
-            user = User(userID=0, username="admin", password=generate_password_hash("admin"), email="", address="",
-                        city="", state="", zipCode="", isAdmin=1)
-            db.session.add(user)
-            db.session.commit()
+
+@app.route("/viewCart", methods=["GET"])
+def viewCart():
+    items = db.session.query(Cart, Inventory)\
+        .join(Inventory, Cart.itemID == Inventory.itemID)\
+        .filter(Cart.userID == current_user.userID)\
+        .all()
+    return render_template('viewCart.html', items=items)
 
 
 @app.route('/addInventory', methods=['GET', 'POST'])
@@ -327,6 +330,16 @@ def sellerDashboard():
         .join(User, Inventory.sellerID == User.userID)\
         .all()
     return render_template('sellerDashboard.html', products=products)
+
+
+def create_tables():
+    with app.app_context():
+        db.create_all()
+        if User.query.filter_by(userID=0).first() is None:
+            user = User(userID=0, username="admin", password=generate_password_hash("admin"), email="", address="",
+                        city="", state="", zipCode="", isAdmin=1)
+            db.session.add(user)
+            db.session.commit()
 
 
 if __name__ == "__main__":
