@@ -188,6 +188,27 @@ def addToCart():
 
         flash("Item added to cart.", "success")
         return redirect(request.referrer or url_for("home"))
+@app.route("/checkout", methods=["GET", "POST"])
+def checkout():
+   if request.method == "POST": 
+       if not cart:
+           flash ("cart is empty")
+           return redirect(request.referrer or url_for("home"))
+  total = sum (item.price* item.quantity for item in cart)
+    order = Order(User_ID = user.userID, total = total)
+    db.session.add(order)
+    db.session.flush()
+for item in cart:
+    orderitems = OrderItems(orderid = orderID, quantity = item.quantity, price = item.price)
+    db.session.add(orderitems)
+
+for item in cart:
+    db.session.delete (item)
+
+return redirect(request.referrer or url_for("checkout"))
+
+# ADMIN STUFF
+
 
 # ADMIN STUFF
 
