@@ -240,6 +240,7 @@ def deleteUser(user_id):
 
 
 @app.route("/viewCart", methods=["GET"])
+@login_required
 def viewCart():
     items = db.session.query(Cart, Inventory)\
         .join(Inventory, Cart.itemID == Inventory.itemID)\
@@ -249,6 +250,7 @@ def viewCart():
 
 
 @app.route('/addInventory', methods=['GET', 'POST'])
+@login_required
 def addInventory():
     if request.method == 'POST':
         try:
@@ -256,6 +258,7 @@ def addInventory():
             sellerID = current_user.userID
             price = request.form['price']
             quantity = request.form['quantity']
+            description = request.form["description"]
 
             # Handle image upload
             image_path = None
@@ -277,7 +280,8 @@ def addInventory():
                 sellerID=sellerID,
                 price=price,
                 stock=quantity,
-                image=image_path
+                image=image_path,
+                description = description
             )
             db.session.add(inventory_item)
             db.session.commit()

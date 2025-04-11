@@ -31,6 +31,7 @@ class Inventory(db.Model):
     price = Column(Numeric(10, 2), nullable=False)
     stock = Column(Integer, nullable=False)
     image = Column(String(255), nullable=True)  # Add this line
+    description = Column(String(255), nullable=False)
 
 
 class Cart(db.Model):
