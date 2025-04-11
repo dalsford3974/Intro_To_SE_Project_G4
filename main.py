@@ -169,7 +169,7 @@ def addToCart():
             return redirect(request.referrer or url_for("home"))
 
         itemID = request.form["itemID"]
-        quantity = request.form["quantity"]
+        quantity = int(request.form["quantity"])
         userID = current_user.userID
 
         item = Inventory.query.filter_by(itemID=itemID).first()
@@ -177,7 +177,7 @@ def addToCart():
             flash("There was an unexpected error. (Item does not exist)", "error")
             return redirect(request.referrer or url_for("home"))
         
-        if item.quantity < quantity:
+        if item.stock < quantity:
             flash("Item out of stock.", "error")
             return redirect(request.referrer or url_for("home"))
         

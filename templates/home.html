@@ -75,7 +75,7 @@
                     <div class="card-body text-center">
                         <h5 class="card-title">{{ item.title }}</h5>
                         <p class="card-text">Price: ${{ "%.2f" | format(item.price) }}</p>
-                        <p class="card-text">In Stock: {{ item.quantity }}</p>
+                        <p class="card-text">In Stock: {{ item.stock }}</p>
                         <p class="card-text">{{ item.description or "No description available." }}</p>
                         <form action="{{ url_for('addToCart') }}" method="post">
                             <input type="hidden" name="itemID" value="{{ item.itemID }}">
