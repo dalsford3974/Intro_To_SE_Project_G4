@@ -176,38 +176,41 @@ def addToCart():
         if not item:
             flash("There was an unexpected error. (Item does not exist)", "error")
             return redirect(request.referrer or url_for("home"))
-        
+
         if item.stock < quantity:
             flash("Item out of stock.", "error")
             return redirect(request.referrer or url_for("home"))
-        
-        cartItem = Cart(userID = userID, itemID = itemID, quantity = quantity)
+
+        cartItem = Cart(userID=userID, itemID=itemID, quantity=quantity)
 
         db.session.add(cartItem)
         db.session.commit()
 
         flash("Item added to cart.", "success")
         return redirect(request.referrer or url_for("home"))
+
+
 @app.route("/checkout", methods=["GET", "POST"])
 def checkout():
-   if request.method == "POST": 
-       if not cart:
-           flash ("cart is empty")
-           return redirect(request.referrer or url_for("home"))
-      total = sum (item.price* item.quantity for item in cart)
-      order = Order(User_ID = user.userID, total = total)
-      db.session.add(order)
-      db.session.flush()
-for item in cart:
-    orderitems = OrderItems(orderid = orderID, quantity = item.quantity, price = item.price)
-    db.session.add(orderitems)
+    if request.method == "POST":
+        if not cart:
+            flash("cart is empty")
+            return redirect(request.referrer or url_for("home"))
 
-for item in cart:
-    db.session.delete (item)
+        total = sum(item.price * item.quantity for item in cart)
+        order = Order(User_ID=user.userID, total=total)
+        db.session.add(order)
+        db.session.flush()
 
-return redirect(request.referrer or url_for("checkout"))
+        for item in cart:
+            orderitems = OrderItems(
+                orderid=orderID, quantity=item.quantity, price=item.price)
+            db.session.add(orderitems)
 
-# ADMIN STUFF
+        for item in cart:
+            db.session.delete(item)
+
+        return redirect(request.referrer or url_for("checkout"))
 
 
 # ADMIN STUFF
@@ -302,7 +305,7 @@ def addInventory():
                 price=price,
                 stock=quantity,
                 image=image_path,
-                description = description
+                description=description
             )
             db.session.add(inventory_item)
             db.session.commit()
