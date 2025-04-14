@@ -6,6 +6,7 @@ import random
 from werkzeug.security import check_password_hash, generate_password_hash
 import os
 from werkzeug.utils import secure_filename
+from datetime import date
 
 
 app = Flask(__name__)
@@ -119,13 +120,6 @@ def viewAccount():
 @app.route("/deleteAccount", methods=["POST"])
 @login_required
 def deleteAccount():
-    print("Delete account route triggered.")
-    print(
-        f"Attempting to delete user: {current_user.username}, ID: {current_user.userID}, isAdmin: {current_user.isAdmin}")
-    # Prevent deletion of the admin account
-    if current_user.userID == 0:
-        flash("Cannot delete admin account.", "error")
-        return redirect(url_for("home"))
 
     # Delete the currently logged-in user"s account
     db.session.delete(current_user)
@@ -140,6 +134,7 @@ def deleteAccount():
 @app.route("/editAccount", methods=["GET", "POST"])
 @login_required
 def editAccount():
+
     if request.method == "POST":
         # Update the currently logged-in user"s account details
         current_user.username = request.form["username"]
@@ -160,13 +155,8 @@ def editAccount():
 @app.route("/addToCart", methods=["GET", "POST"])
 @login_required
 def addToCart():
-    error = None
 
     if request.method == "POST":
-
-        if current_user.isAdmin:
-            flash("Admins cannot purchase items.", "error")
-            return redirect(request.referrer or url_for("home"))
 
         itemID = request.form["itemID"]
         quantity = int(request.form["quantity"])
@@ -190,25 +180,48 @@ def addToCart():
         return redirect(request.referrer or url_for("home"))
 
 
+# @app.route("/viewCart", methods=["GET"])
+# @login_required
+# def viewCart():
+
+#     items = Cart.query.filter_by(uersID = current_user.userID).all()
+#     return render_template("viewCart.html", items = items)
+
+
 @app.route("/checkout", methods=["GET", "POST"])
+@login_required
 def checkout():
+
     if request.method == "POST":
-        if not cart:
+
+        while True:
+
+            orderID = random.randint(100000000, 999999999)
+            exists = User.query.filter_by(orderID=orderID).first()
+            if not exists:
+                break
+
+        items = Cart.query.filter_by(userID = current_user.userID).all()
+
+        if items is None:
             flash("cart is empty")
-            return redirect(request.referrer or url_for("home"))
+            return redirect(request.referrer or url_for("cart"))
 
-        total = sum(item.price * item.quantity for item in cart)
-        order = Order(User_ID=user.userID, total=total)
-        db.session.add(order)
-        db.session.flush()
+        total = 0
+        numItems = 0
 
-        for item in cart:
-            orderitems = OrderItems(
-                orderid=orderID, quantity=item.quantity, price=item.price)
-            db.session.add(orderitems)
-
-        for item in cart:
+        for item in items:
+            cost = Inventory.query.filter_by(itemID = item.itemID).cost
+            quant = Cart.query.filter_by(itemID = item.itemID, userID = current_user.userID).quantity
+            total += cost
+            numItems += quant
+            orderItem = OrderItems(historyID = orderID, orderID = orderID, itemID = item.itemID, quantity = quant)
+            db.session.add(orderItem)
             db.session.delete(item)
+
+        order = Orders(orderID = orderID, userID = current_user.userID, itemNumber = numItems, cost = total, date = date.today())
+        db.session.add(order)
+        db.session.commit()
 
         return redirect(request.referrer or url_for("checkout"))
 
@@ -219,10 +232,6 @@ def checkout():
 @app.route("/adminDashboard", methods=["GET"])
 @login_required
 def adminDashboard():
-    # Ensure only admins can access this page
-    if not current_user.isAdmin:
-        flash("You do not have permission to access this page.", "error")
-        return redirect(url_for("home"))
 
     # Get the search query from the request arguments
     search_query = request.args.get("search", "")
@@ -242,10 +251,6 @@ def adminDashboard():
 @app.route("/deleteUser/<int:user_id>", methods=["POST"])
 @login_required
 def deleteUser(user_id):
-    # Ensure only admins can delete accounts
-    if not current_user.isAdmin:
-        flash("You do not have permission to perform this action.", "error")
-        return redirect(url_for("home"))
 
     # Prevent deletion of the admin account
     if user_id == current_user.userID:
