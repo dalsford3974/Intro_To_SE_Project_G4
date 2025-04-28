@@ -334,26 +334,32 @@ def viewInventory():
 @app.route('/deleteInventory/<int:item_id>', methods=['POST'])
 @login_required
 def deleteInventory(item_id):
-    item = Inventory.query.get_or_404(item_id)
+
+    item = Inventory.query.get(item_id)
+    if not item:
+        flash('Item not found.', 'error')
+        return redirect(url_for('sellerDashboard'))
 
     # Verify the current user owns this item or is an admin
     if item.sellerID != current_user.userID and not current_user.isAdmin:
         return redirect(url_for('viewInventory'))
 
+    # Delete the item's image if it exists
     if item.image:
         image_path = os.path.join(app.root_path, 'static', item.image)
         if os.path.exists(image_path):
             os.remove(image_path)
 
+    # Delete the item from the database
     db.session.delete(item)
     db.session.commit()
     flash('Item deleted successfully!', 'success')
 
-    if current_user.isAdmin:
-        return render_template('sellerDashboard.html', products=Inventory.query.all())
-    else:
-        return render_template('viewProducts.html', products=Inventory.query.filter_by(sellerID=current_user.userID).all())
+    # Query to get products with seller information
+    products = db.session.query(Inventory, User.username)\
+        .join(User, Inventory.sellerID == User.userID).all()
 
+    return render_template('sellerDashboard.html', products=products)
 
 @app.route('/sellerDashboard', methods=['GET'])
 @login_required
