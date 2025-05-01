@@ -1,0 +1,44 @@
+{% extends "home.html" %}
+{% block content %}
+
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Your Cart</h2>
+
+    {% if cart_items %}
+    <div class="row">
+        {% for item_id, quantity in cart_items.items() %}
+        {% set item = inventory[item_id | int] %}
+        <div class="col-md-4 mb-4 d-flex align-items-stretch">
+            <div class="card shadow-sm w-100">
+                {% if item.image %}
+                <img src="{{ url_for('static', filename=item.image) }}" class="card-img-top" alt="{{ item.title }}" style="height: 200px; object-fit: contain;">
+                {% else %}
+                <img src="{{ url_for('static', filename='products/default.jpg') }}" class="card-img-top" alt="No image available" style="height: 200px; object-fit: contain;">
+                {% endif %}
+                <div class="card-body text-center">
+                    <h5 class="card-title">{{ item.title }}</h5>
+                    <p class="card-text">Price: ${{ "%.2f" | format(item.price) }}</p>
+                    <p class="card-text">Quantity: {{ quantity }}</p>
+                    <form action="{{ url_for('removeFromCart', item_id=item.itemID) }}" method="post">
+                        <div class="input-group mb-3">
+                            <input type="number" name="quantity" class="form-control" min="1" max="{{ quantity }}" value="1" required>
+                            <button type="submit" class="btn btn-danger">Remove</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Checkout Button -->
+    <form action="{{ url_for('checkout') }}" method="post">
+        <button type="submit" class="btn btn-success btn-lg mt-4">Checkout</button>
+    </form>
+
+    {% else %}
+    <p class="text-center">Your cart is empty.</p>
+    {% endif %}
+</div>
+
+{% endblock %}

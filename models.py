@@ -36,7 +36,8 @@ class Inventory(db.Model):
 
 class Cart(db.Model):
     __tablename__ = 'cart'
-    userID = Column(Integer, ForeignKey('users.userID'), primary_key=True, nullable=False)
+    cartID = Column(Integer, primary_key=True, autoincrement=True)  # Unique identifier for each row
+    userID = Column(Integer, ForeignKey('users.userID'), nullable=False)
     itemID = Column(Integer, ForeignKey('inventory.itemID'), nullable=False)
     quantity = Column(Integer, nullable=False)
 

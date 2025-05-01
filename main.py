@@ -6,7 +6,7 @@ import random
 from werkzeug.security import check_password_hash, generate_password_hash
 import os
 from werkzeug.utils import secure_filename
-from datetime import date
+from datetime import datetime
 
 
 app = Flask(__name__)
@@ -24,14 +24,19 @@ login.login_message = "Please log in to access this page."
 def load_user(id):
     return db.session.get(User, int(id))
 
-
-@app.route("/")
+@app.route('/', methods=['GET', 'POST'])
+@login_required
 def home():
-    if current_user.is_authenticated:
-        items = Inventory.query.all()
-        return render_template("home.html", user=current_user, items=items)
-    return render_template("login.html")
+    search_query = request.args.get('search', '').strip()  # Get the search query from the URL parameters
 
+    if search_query:
+        # Filter items in the inventory based on the search query
+        items = Inventory.query.filter(Inventory.title.ilike(f'%{search_query}%')).all()
+    else:
+        # If no search query, display all items
+        items = Inventory.query.all()
+
+    return render_template('home.html', items=items, search_query=search_query)
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -178,52 +183,6 @@ def addToCart():
 
         flash("Item added to cart.", "success")
         return redirect(request.referrer or url_for("home"))
-
-
-# @app.route("/viewCart", methods=["GET"])
-# @login_required
-# def viewCart():
-
-#     items = Cart.query.filter_by(uersID = current_user.userID).all()
-#     return render_template("viewCart.html", items = items)
-
-
-@app.route("/checkout", methods=["GET", "POST"])
-@login_required
-def checkout():
-
-    if request.method == "POST":
-
-        while True:
-
-            orderID = random.randint(100000000, 999999999)
-            exists = User.query.filter_by(orderID=orderID).first()
-            if not exists:
-                break
-
-        items = Cart.query.filter_by(userID = current_user.userID).all()
-
-        if items is None:
-            flash("cart is empty")
-            return redirect(request.referrer or url_for("cart"))
-
-        total = 0
-        numItems = 0
-
-        for item in items:
-            cost = Inventory.query.filter_by(itemID = item.itemID).cost
-            quant = Cart.query.filter_by(itemID = item.itemID, userID = current_user.userID).quantity
-            total += cost
-            numItems += quant
-            orderItem = OrderItems(historyID = orderID, orderID = orderID, itemID = item.itemID, quantity = quant)
-            db.session.add(orderItem)
-            db.session.delete(item)
-
-        order = Orders(orderID = orderID, userID = current_user.userID, itemNumber = numItems, cost = total, date = date.today())
-        db.session.add(order)
-        db.session.commit()
-
-        return redirect(request.referrer or url_for("checkout"))
 
 
 # ADMIN STUFF
@@ -380,6 +339,149 @@ def create_tables():
             db.session.add(user)
             db.session.commit()
 
+
+@app.route('/cart', methods=['GET'])
+@login_required
+def cart():
+    # Get all items in the user's cart
+    cart_items = Cart.query.filter_by(userID=current_user.userID).all()
+
+    # Fetch inventory details for the items in the cart
+    inventory = {item.itemID: item for item in Inventory.query.filter(
+        Inventory.itemID.in_([cart_item.itemID for cart_item in cart_items])
+    ).all()}
+
+    # Prepare cart data for rendering
+    cart_data = {}
+    for cart_item in cart_items:
+        if cart_item.itemID in cart_data:
+            cart_data[cart_item.itemID] += cart_item.quantity
+        else:
+            cart_data[cart_item.itemID] = cart_item.quantity
+
+    return render_template('cart.html', cart_items=cart_data, inventory=inventory)
+
+@app.route('/addToCart/<int:item_id>', methods=['POST'], endpoint='add_to_cart')
+@login_required
+def addToCart(item_id):
+    # Fetch the item from the inventory
+    item = Inventory.query.get(item_id)
+    if not item:
+        flash('Item not found.', 'error')
+        return redirect(url_for('home'))
+
+    # Check if the item is already in the user's cart
+    cart_item = Cart.query.filter_by(userID=current_user.userID, itemID=item_id).first()
+    if cart_item:
+        # Increment the quantity if the item already exists in the cart
+        cart_item.quantity += 1
+    else:
+        # Add a new item to the cart if it doesn't exist
+        cart_item = Cart(userID=current_user.userID, itemID=item_id, quantity=1)
+        db.session.add(cart_item)
+
+    try:
+        db.session.commit()
+        flash('Item added to your cart.', 'success')
+    except sqlalchemy.exc.IntegrityError:
+        db.session.rollback()
+        flash('Failed to add item to your cart due to a database constraint.', 'error')
+
+    return redirect(url_for('cart'))
+
+
+@app.route('/removeFromCart/<int:item_id>', methods=['POST'])
+@login_required
+def removeFromCart(item_id):
+    # Find the cart item
+    cart_item = Cart.query.filter_by(userID=current_user.userID, itemID=item_id).first()
+    if not cart_item:
+        flash('Item not found in your cart.', 'error')
+        return redirect(url_for('cart'))
+
+    # Get the quantity to remove from the form
+    try:
+        quantity_to_remove = int(request.form.get('quantity', 1))
+    except ValueError:
+        flash('Invalid quantity specified.', 'error')
+        return redirect(url_for('cart'))
+
+    # Ensure the quantity to remove is valid
+    if quantity_to_remove < 1:
+        flash('Quantity must be at least 1.', 'error')
+        return redirect(url_for('cart'))
+
+    # Decrement the quantity or remove the item if the quantity reaches 0
+    if cart_item.quantity > quantity_to_remove:
+        cart_item.quantity -= quantity_to_remove
+    else:
+        db.session.delete(cart_item)
+
+    try:
+        db.session.commit()
+        flash('Item updated in your cart.', 'success')
+    except sqlalchemy.exc.IntegrityError:
+        db.session.rollback()
+        flash('Failed to update your cart due to a database constraint.', 'error')
+
+    return redirect(url_for('cart'))
+
+@app.route('/checkout', methods=['POST'])
+@login_required
+def checkout():
+    # Get all items in the user's cart
+    cart_items = Cart.query.filter_by(userID=current_user.userID).all()
+
+    if not cart_items:
+        flash('Your cart is empty. Add items before checking out.', 'error')
+        return redirect(url_for('cart'))
+
+    # Calculate the total cost and create an order
+    total_cost = 0
+    for cart_item in cart_items:
+        item = Inventory.query.get(cart_item.itemID)
+        if item and item.stock >= cart_item.quantity:
+            total_cost += item.price * cart_item.quantity
+        else:
+            flash(f'Item "{item.title}" is out of stock or insufficient quantity.', 'error')
+            return redirect(url_for('cart'))
+
+    # Create a new order
+    new_order = Orders(
+        userID=current_user.userID,
+        itemNumber=len(cart_items),
+        cost=total_cost,
+        date=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    )
+    db.session.add(new_order)
+    db.session.commit()
+
+    # Add items to the OrderItems table and update inventory stock
+    for cart_item in cart_items:
+        item = Inventory.query.get(cart_item.itemID)
+        if item:
+            # Add to OrderItems with quantity
+            order_item = OrderItems(
+                orderID=new_order.orderID,
+                itemID=item.itemID,
+                quantity=cart_item.quantity  # Include quantity here
+            )
+            db.session.add(order_item)
+
+            # Update inventory stock
+            item.stock -= cart_item.quantity
+
+    # Clear the user's cart
+    Cart.query.filter_by(userID=current_user.userID).delete()
+
+    try:
+        db.session.commit()
+        flash('Checkout successful! Your order has been placed.', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash('An error occurred during checkout. Please try again.', 'error')
+
+    return redirect(url_for('home'))
 
 if __name__ == "__main__":
     create_tables()
